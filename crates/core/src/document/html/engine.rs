@@ -436,7 +436,7 @@ impl Engine {
 
         draw_state.position.y += style.padding.top;
 
-        let has_blocks = node.children().any(|n| n.is_block());
+        let has_blocks = node.has_block_descendant();
 
         if has_blocks {
             if node.id().is_some() {

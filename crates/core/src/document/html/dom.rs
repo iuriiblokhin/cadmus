@@ -461,6 +461,16 @@ impl<'a> NodeRef<'a> {
         matches!(self.node.data, NodeData::Wrapper(..))
     }
 
+    /// Returns `true` if a block-level descendant can be reached without
+    /// crossing another block-level element, i.e. this node acts as a block
+    /// container even when it (or an inline element nested inside it) isn't
+    /// block-level itself. Handles markup that wraps a run of `<p>` elements
+    /// in a bare `<span>` (or any other non-block tag).
+    pub fn has_block_descendant(&self) -> bool {
+        self.children()
+            .any(|child| child.is_block() || (child.is_element() && child.has_block_descendant()))
+    }
+
     pub fn data(&self) -> &'a NodeData {
         &self.node.data
     }

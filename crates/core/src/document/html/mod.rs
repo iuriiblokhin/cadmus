@@ -764,4 +764,42 @@ mod tests {
             min_x
         );
     }
+
+    #[test]
+    fn span_wrapped_paragraphs_do_not_merge() {
+        // Some FB2->EPUB pipelines wrap a chapter's `<p>` elements in a bare
+        // `<span>`. The `<p>` descendants must still be laid out as separate
+        // blocks rather than flattened into one continuous inline run.
+        let html =
+            r#"<body><span><p>First paragraph.</p><p>Second paragraph.</p></span></body>"#;
+        let mut doc = setup_doc(html);
+
+        let pages = doc.base.build_pages();
+        let all_commands: Vec<_> = pages.iter().flatten().collect();
+
+        let text_y_positions: Vec<i32> = all_commands
+            .iter()
+            .filter_map(|cmd| match cmd {
+                DrawCommand::Text(tc) => Some(tc.position.y),
+                DrawCommand::ExtraText(tc) => Some(tc.position.y),
+                _ => None,
+            })
+            .collect();
+
+        assert!(
+            text_y_positions.len() >= 2,
+            "expected at least two text items, got {}",
+            text_y_positions.len()
+        );
+
+        let min_y = text_y_positions.iter().copied().min().unwrap();
+        let max_y = text_y_positions.iter().copied().max().unwrap();
+
+        assert!(
+            max_y > min_y,
+            "the two paragraphs should render on different lines (min_y={}, max_y={})",
+            min_y,
+            max_y
+        );
+    }
 }
