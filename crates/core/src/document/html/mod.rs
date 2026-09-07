@@ -770,8 +770,7 @@ mod tests {
         // Some FB2->EPUB pipelines wrap a chapter's `<p>` elements in a bare
         // `<span>`. The `<p>` descendants must still be laid out as separate
         // blocks rather than flattened into one continuous inline run.
-        let html =
-            r#"<body><span><p>First paragraph.</p><p>Second paragraph.</p></span></body>"#;
+        let html = r#"<body><span><p>First paragraph.</p><p>Second paragraph.</p></span></body>"#;
         let mut doc = setup_doc(html);
 
         let pages = doc.base.build_pages();
